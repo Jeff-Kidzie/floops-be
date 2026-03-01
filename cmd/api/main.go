@@ -45,10 +45,9 @@ func main() {
 }
 
 func loadDb() {
-	// Load environment variables from .env file
-	err := godotenv.Load("local.env")
-	if err != nil {
-		log.Fatalf("Error loading local.env file: %v", err)
+	// Load environment variables from local.env if present (ignored in containerized environments)
+	if err := godotenv.Load("local.env"); err != nil {
+		log.Println("local.env not found, using environment variables")
 	}
 
 	if err := database.Connect(); err != nil {
