@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jeff-kidzie/floops-be/internal/database"
+	"github.com/jeff-kidzie/floops-be/internal/handlers"
 	"github.com/joho/godotenv"
 )
 
@@ -33,6 +34,13 @@ func main() {
 		})
 	})
 
+	auth := router.Group("/auth")
+	{
+		auth.POST("/register", handlers.Register)
+		auth.POST("/login", handlers.Login)
+		auth.POST("/forgot-password", handlers.ForgotPassword)
+	}
+
 	router.Run(":8080")
 }
 
@@ -46,5 +54,4 @@ func loadDb() {
 	if err := database.Connect(); err != nil {
 		log.Fatalf("could not connect to DB: %v", err)
 	}
-	defer database.DB.Close()
 }
