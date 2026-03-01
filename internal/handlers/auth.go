@@ -23,6 +23,8 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+var jwtSecret = []byte("this_is_a_secret_key_for_jwt") // In production, use a secure method to manage secrets
+
 func Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,11 +59,12 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	// var req LoginRequest
-	// if err := c.ShouldBindJSON(&req); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	
 }
 
 func ForgotPassword(c *gin.Context) {}
