@@ -79,12 +79,12 @@ func Login(c *gin.Context) {
 	}
 
 	query := `
-		SELECT id, email,username, password_hash, created_at 
-		FROM users 
+		SELECT id, email, username, COALESCE(password_hash, ''), google_id, created_at
+		FROM users
 		WHERE email=$1
 	`
 	var user models.User
-	err := database.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.CreatedAt)
+	err := database.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.GoogleID, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})

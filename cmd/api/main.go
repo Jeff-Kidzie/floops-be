@@ -5,13 +5,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jeff-kidzie/floops-be/internal/chat"
 	"github.com/jeff-kidzie/floops-be/internal/database"
 	"github.com/jeff-kidzie/floops-be/internal/handlers"
+	"github.com/jeff-kidzie/floops-be/internal/middleware"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	loadDb()
+
+	chat.GlobalHub = chat.NewHub()
+	go chat.GlobalHub.Run()
+
 	router := gin.Default()
 
 	router.GET("/health", func(c *gin.Context) {
@@ -34,12 +40,25 @@ func main() {
 		})
 	})
 
+	handlers.InitGoogleOAuth()
+
 	auth := router.Group("/auth")
 	{
 		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
 		auth.POST("/forgot-password", handlers.ForgotPassword)
+		auth.GET("/google/login", handlers.GoogleLogin)
+		auth.GET("/google/callback", handlers.GoogleCallback)
 	}
+
+	api := router.Group("/api", middleware.AuthRequired())
+	{
+		api.POST("/conversations", handlers.CreateConversation)
+		api.GET("/conversations", handlers.GetConversations)
+		api.GET("/conversations/:id/messages", handlers.GetMessages)
+	}
+
+	router.GET("/ws/:conversationID", handlers.HandleWebSocket)
 
 	router.Run(":8080")
 }
